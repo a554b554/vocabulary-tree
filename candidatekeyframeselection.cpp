@@ -14,10 +14,10 @@ clusternode::clusternode()
 vocabularytree::vocabularytree()
 {
     root = new clusternode;
-    this->branchingfactor = 6;
-    this->totallevel = 6;
+    this->branchingfactor = 3;
+    this->totallevel = 3;
     thresholdfoKmeans = 10;
-    
+    counterforlevel = 0;
 }
 void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is a node which contain a lots of featurepoint, center is a featurepoint.
 {
@@ -34,7 +34,7 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
     
     for (int i = 0 ; i<this->branchingfactor ;i++) {
         currentcenter[i] = currentnode.at(rand()%currentnode.size());
-        currentnode.at(i).setflag(i);
+        currentnode.at(i%currentnode.size()).setflag(i);
        // precenter[i]=currentnode->at(i);
         currentcenter[i].print();
         cout<<"~~~~~~~~~~~~~~~~~"<<endl;
@@ -57,9 +57,7 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
                 }
             }
         }
-        for (int i=0; i<currentnode.size(); i++) {
-            //cout<<currentnode->at(i).getflag()<<endl;
-        }
+ 
         for (int i = 0; i<this->branchingfactor; i++) {
             count=0;
             tempx=0;
@@ -86,10 +84,10 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
         }
         
         for (int i = 0 ; i<branchingfactor; i++) {
-            cout<<"pre:";
+            /*cout<<"pre:";
             precenter[i].print();
             cout<<"cur:";
-            currentcenter[i].print();
+            currentcenter[i].print();*/
             precenter[i] = currentcenter [i];
         }
         cout<<"~~~~~~~~"<<endl;
@@ -148,5 +146,57 @@ clusternode::clusternode(clusternode &node)
     this->featureset=node.featureset;
     for (int i = 0; i<node.child.size(); i++) {
         this->child.push_back(node.child[i]);
+    }
+}
+
+void vocabularytree::construction(clusternode &node)//recursive construction for vocabulary.
+{
+    kmeanconstructor(node);
+    if (getlevelofcurrenttree()<totallevel) {//wait for implement.
+        for (int i = 0; i<branchingfactor; i++) {
+            construction(*(node.child[i]));
+        }
+    }
+   
+}
+
+int vocabularytree::getlevelofcurrenttree()
+{
+    int counter=1;
+    clusternode *p;
+    p=root;
+    while (!p->child.empty()) {
+        p=p->child[0];
+        counter++;
+    }
+    return counter;
+}
+
+void vocabularytree::printinfo()
+{
+    clusternode *p = new clusternode;
+    p=root;
+    p->print();
+   
+}
+
+void clusternode::print()
+{
+    printf("nodesize:%zu\n",size());
+}
+
+void vocabularytree::printnode(clusternode &node)
+{
+    clusternode *p = new clusternode;
+    p=&node;
+    counterforlevel++;
+    cout<<"node:"<<counterforlevel;
+    p->print();
+    if(!(p->child.empty())){
+        for (int i = 0; i<branchingfactor; i++) {
+            
+            printnode(*(p->child[i]));
+            
+        }
     }
 }

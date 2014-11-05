@@ -12,7 +12,7 @@
 using namespace std;
 int main(int argc, const char * argv[]) {
     vector<featurepoint> pointset;
-    const int testsize = 100;
+    const int testsize = 10000;
     featurepoint *temp = new  featurepoint;
    // srand(time(0));
     for (int i = 0; i<testsize; i++) {
@@ -21,9 +21,9 @@ int main(int argc, const char * argv[]) {
         pointset.push_back(*temp);
     }
     delete temp;
-    for (int i=0; i<testsize; i++) {
+    /*for (int i=0; i<testsize; i++) {
         cout<<"x:"<<pointset[i].getx()<<"y:"<<pointset[i].gety()<<endl;
-    }
+    }*/
     cout<<"~~~~~~~~~~"<<endl;
     vocabularytree tree;
     tree.setroot(pointset);
@@ -32,9 +32,8 @@ int main(int argc, const char * argv[]) {
 
     }*/
     //cout<<"size:"<<tree.root->size()<<endl;
-    tree.kmeanconstructor(*tree.root);
-    for (int i = 0; i<tree.getbranch(); i++) {
-        cout<<tree.root->child[i]->featureset.size()<<endl;
-    }
+    tree.construction(*tree.root);
+    cout<<"tree info"<<endl;
+    tree.printnode(*tree.root);
     return 0;
 }

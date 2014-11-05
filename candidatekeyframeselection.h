@@ -56,6 +56,7 @@ public:
     //void appendfeatureset(featurepoint p);
     featurepoint& at(int i);
     size_t size()const{return featureset.size();};//size of featureset.
+    void print();
 
 };
 class vocabularytree
@@ -65,6 +66,7 @@ private:
     int branchingfactor;
     int totallevel;
     double thresholdfoKmeans;
+    int counterforlevel;
 public:
     vector<clusternode> node;
     clusternode *root;
@@ -75,7 +77,11 @@ public:
     double dist(const featurepoint& p1,const featurepoint& p2);
     void kmean();
     void kmeanconstructor(clusternode &currentnode);
+    void construction(clusternode &node);
     int getbranch(){return branchingfactor;};
     int gettotallevel(){return totallevel;};
+    int getlevelofcurrenttree();
+    void printinfo();
+    void printnode(clusternode &node);
 };
 #endif /* defined(__openCV__candidatekeyframeselection__) */

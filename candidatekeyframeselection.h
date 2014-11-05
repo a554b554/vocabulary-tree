@@ -49,6 +49,7 @@ public:
     static int getbranchingfactor();
     static int gettotallevel();
     clusternode();
+    clusternode(clusternode &node);
     void init();
     int getlevel();
    // void appendchild(clusternode* node);

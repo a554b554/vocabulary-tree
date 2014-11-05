@@ -106,7 +106,7 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
         }
         currentnode.child.push_back(newnode);
         cout<< i<<": "<<currentnode.child[i]->featureset.size()<<endl;
-        delete  newnode;
+       // delete  newnode;
     }
 
     delete [] currentcenter;
@@ -141,4 +141,12 @@ void clusternode::init()
 void featurepoint::print()
 {
     printf("x:%lf,y:%lf\n",this->x,this->y);
+}
+
+clusternode::clusternode(clusternode &node)
+{
+    this->featureset=node.featureset;
+    for (int i = 0; i<node.child.size(); i++) {
+        this->child.push_back(node.child[i]);
+    }
 }

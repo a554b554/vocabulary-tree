@@ -31,6 +31,7 @@ int main(int argc, const char * argv[]) {
         cout<<tree.root->featureset[i].getx()<<endl;;
 
     }*/
+    //cout<<"size:"<<tree.root->size()<<endl;
     tree.kmeanconstructor(*tree.root);
     for (int i = 0; i<tree.getbranch(); i++) {
         cout<<tree.root->child[i]->featureset.size()<<endl;

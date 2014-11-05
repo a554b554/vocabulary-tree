@@ -24,7 +24,16 @@ int main(int argc, const char * argv[]) {
     for (int i=0; i<testsize; i++) {
         cout<<"x:"<<pointset[i].getx()<<"y:"<<pointset[i].gety()<<endl;
     }
+    cout<<"~~~~~~~~~~"<<endl;
     vocabularytree tree;
-    
+    tree.setroot(pointset);
+    /*for (int i =0; i<testsize; i++) {
+        cout<<tree.root->featureset[i].getx()<<endl;;
+
+    }*/
+    tree.kmeanconstructor(*tree.root);
+    for (int i = 0; i<tree.getbranch(); i++) {
+        cout<<tree.root->child[i]->featureset.size()<<endl;
+    }
     return 0;
 }

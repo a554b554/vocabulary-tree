@@ -37,11 +37,10 @@ public:
         this->x=rhs.x;
         this->y=rhs.y;
     }
+    void print();
 };
 class clusternode
 {
-
-    
     static int branchingfactor;
     static int totallevel;
 public:
@@ -50,28 +49,32 @@ public:
     static int getbranchingfactor();
     static int gettotallevel();
     clusternode();
+    void init();
     int getlevel();
    // void appendchild(clusternode* node);
     //void appendfeatureset(featurepoint p);
     featurepoint& at(int i);
     size_t size()const{return featureset.size();};//size of featureset.
-  
+
 };
 class vocabularytree
 {
 private:
-    vector<clusternode> node;
-    clusternode *root;
+
     int branchingfactor;
     int totallevel;
     double thresholdfoKmeans;
 public:
-    vocabularytree(){root = NULL;};
+    vector<clusternode> node;
+    clusternode *root;
+    vocabularytree();
     vocabularytree(const vector <featurepoint> &allfeatures,int level,int brach);
     void setroot(const vector<featurepoint> &all);
     const frame& findkeyframe();
     double dist(const featurepoint& p1,const featurepoint& p2);
     void kmean();
-    void kmeanconstructor(clusternode *currentnode);
+    void kmeanconstructor(clusternode &currentnode);
+    int getbranch(){return branchingfactor;};
+    int gettotallevel(){return totallevel;};
 };
 #endif /* defined(__openCV__candidatekeyframeselection__) */

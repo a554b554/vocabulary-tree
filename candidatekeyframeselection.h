@@ -67,8 +67,8 @@ public:
     vector <clusternode*> child;
     static int getbranchingfactor();
     static int gettotallevel();
-    clusternode();
-    clusternode(clusternode &node);
+   // clusternode();
+    //clusternode(clusternode &node);
     void init();
     int getlevel();
    // void appendchild(clusternode* node);
@@ -110,6 +110,6 @@ public:
     double getweight(clusternode &node);
     frameset candidatekeyframesearching(frameset &candidateframe,vector<featurepoint> &pointinliveframe);
     
-    vector<clusternode*> getnodebylevel(int level);
+    vector<clusternode*>* getnodebylevel(int level);
 };
 #endif /* defined(__openCV__candidatekeyframeselection__) */

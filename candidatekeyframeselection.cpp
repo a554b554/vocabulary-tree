@@ -49,7 +49,7 @@ void clusternode::init()
     child.clear();
 }
 
-
+/*
 clusternode::clusternode(clusternode &node)
 {
     this->featureset=node.featureset;
@@ -61,7 +61,7 @@ clusternode::clusternode()
 {
     
 }
-
+*/
 int clusternode::getnumberofspannedframe()
 {
     return 1;
@@ -224,10 +224,21 @@ int vocabularytree::getlevelofcurrenttree()
 
 void vocabularytree::printinfo()
 {
+    queue<clusternode*> nodequeue;
     clusternode *p = new clusternode;
-    p=root;
-    p->print();
-    
+    nodequeue.push(root);
+    cout<<"branchingfactor:"<<branchingfactor<<endl;
+    cout<<"totallevel:"<<totallevel<<endl;
+    while (!nodequeue.empty()) {
+        p=nodequeue.front();
+        p->print();
+        nodequeue.pop();
+        if (!p->child.empty()) {
+            for (int i = 0; i<branchingfactor; i++) {
+                nodequeue.push(p->child[i]);
+            }
+        }
+    }
 }
 
 double vocabularytree::dist(const featurepoint &p1, const featurepoint &p2)//temporary.
@@ -255,10 +266,10 @@ frameset vocabularytree::candidatekeyframesearching(frameset &candidateframe, ve
 }
 
 //this algorithm was invented by a genius.
-vector <clusternode*> vocabularytree::getnodebylevel(int level) //root is in level 1.
+vector <clusternode*>* vocabularytree::getnodebylevel(int level) //root is in level 1.
 {
     int visited = 0;
-    vector<clusternode*> ans;
+    vector<clusternode*> *ans = new vector<clusternode*>;
     queue<clusternode> nodequeue;
     clusternode *node = new clusternode;
     nodequeue.push(*root);
@@ -278,9 +289,12 @@ vector <clusternode*> vocabularytree::getnodebylevel(int level) //root is in lev
     }
     
     while (!nodequeue.empty()) {
-        *node = nodequeue.front();
+        clusternode *nd = new clusternode(nodequeue.front());
         nodequeue.pop();
-        ans.push_back(node);
+        ans->push_back(nd);
+   //     cout<<"ans:"<<ans->back()->size() <<endl;
+     //   cout<<"x:"<<ans->back()->featureset[0].getx()<<endl;
     }
+    //cout<<"ans:"<<ans->at(0)->size()<<endl;
     return ans;
 }

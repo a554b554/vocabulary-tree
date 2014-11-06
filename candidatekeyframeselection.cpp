@@ -6,12 +6,99 @@
 //  Copyright (c) 2014 DarkTango. All rights reserved.
 //
 #include <cstdio>
+#include <cstdlib>
 #include "candidatekeyframeselection.h"
+/***********GLOBAL*********/
+
+int quickpow(int m,int n)
+{
+    int b = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            b = (b*m);
+        n = n >> 1 ;
+        m = (m*m);
+    }
+    return b;
+}
+
+/********************FRAMESET*****************************/
+
+/********************FRAME***********************/
+frame::frame()
+{
+    matchingvalue=0;
+    frame_id=-1;
+}
+/************FEATURE POINT********************************/
+featurepoint& clusternode::at(int i) //temporary.
+{
+    return featureset.at(i);
+}
+
+void featurepoint::print()
+{
+    printf("x:%lf,y:%lf\n",this->x,this->y);
+}
+/**********CLUSTERNODE***************************************/
+
+void clusternode::init()
+{
+    featureset.clear();
+    child.clear();
+}
+
+
+clusternode::clusternode(clusternode &node)
+{
+    this->featureset=node.featureset;
+    for (int i = 0; i<node.child.size(); i++) {
+        this->child.push_back(node.child[i]);
+    }
+}
 clusternode::clusternode()
 {
     
 }
-vocabularytree::vocabularytree()
+
+int clusternode::getnumberofspannedframe()
+{
+    return 1;
+}
+
+
+void clusternode::print()
+{
+    printf("nodesize:%zu\n",size());
+}
+
+
+/****************VOCABULARY TREE*****************************/
+void vocabularytree::printnode(clusternode &node)
+{
+    clusternode *p = new clusternode;
+    p=&node;
+    counterforlevel++;
+    cout<<"node:"<<counterforlevel;
+    p->print();
+    if(!(p->child.empty())){
+        for (int i = 0; i<branchingfactor; i++) {
+            
+            printnode(*(p->child[i]));
+            
+        }
+    }
+}
+
+double vocabularytree::getweight(clusternode &node)
+{
+    double w;
+    w=log(totalnumberofkeyframe/node.getnumberofspannedframe());
+    return  w;
+}
+
+vocabularytree::vocabularytree()//construction function need to be overload.
 {
     root = new clusternode;
     this->branchingfactor = 3;
@@ -35,7 +122,7 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
     for (int i = 0 ; i<this->branchingfactor ;i++) {
         currentcenter[i] = currentnode.at(rand()%currentnode.size());
         currentnode.at(i%currentnode.size()).setflag(i);
-       // precenter[i]=currentnode->at(i);
+        // precenter[i]=currentnode->at(i);
         currentcenter[i].print();
         cout<<"~~~~~~~~~~~~~~~~~"<<endl;
     }
@@ -57,7 +144,7 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
                 }
             }
         }
- 
+        
         for (int i = 0; i<this->branchingfactor; i++) {
             count=0;
             tempx=0;
@@ -73,7 +160,7 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
             tempx/=count;
             tempy/=count;
             currentcenter[i].set(tempx, tempy);
-           // cout<<i<<" "<<currentcenter[i].getx()<<" "<<currentcenter[i].gety()<<endl;
+            // cout<<i<<" "<<currentcenter[i].getx()<<" "<<currentcenter[i].gety()<<endl;
         }
         breakflag = true;
         for (int i = 0; i<branchingfactor; i++) {
@@ -85,14 +172,14 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
         
         for (int i = 0 ; i<branchingfactor; i++) {
             /*cout<<"pre:";
-            precenter[i].print();
-            cout<<"cur:";
-            currentcenter[i].print();*/
+             precenter[i].print();
+             cout<<"cur:";
+             currentcenter[i].print();*/
             precenter[i] = currentcenter [i];
         }
         cout<<"~~~~~~~~"<<endl;
     }
-   //new node for cluster
+    //new node for cluster
     
     for (int i = 0; i<branchingfactor; i++) {
         clusternode *newnode = new clusternode;
@@ -104,49 +191,12 @@ void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is 
         }
         currentnode.child.push_back(newnode);
         cout<< i<<": "<<currentnode.child[i]->featureset.size()<<endl;
-       // delete  newnode;
+        // delete  newnode;
     }
-
+    
     delete [] currentcenter;
     delete [] precenter;
     
-}
-
-featurepoint& clusternode::at(int i) //temporary.
-{
-    return featureset.at(i);
-}
-
-double vocabularytree::dist(const featurepoint &p1, const featurepoint &p2)//temporary.
-{
-    return (p1.getx()-p2.getx())*(p1.getx()-p2.getx())+(p1.gety()-p2.gety())*(p1.gety()-p2.gety());
-}
-
-void vocabularytree::setroot(const vector<featurepoint> &all)
-{
-    int i;
-    for (i=0; i<all.size(); i++) {
-        root->featureset.push_back(all[i]);
-    }
-}
-
-void clusternode::init()
-{
-    featureset.clear();
-    child.clear();
-}
-
-void featurepoint::print()
-{
-    printf("x:%lf,y:%lf\n",this->x,this->y);
-}
-
-clusternode::clusternode(clusternode &node)
-{
-    this->featureset=node.featureset;
-    for (int i = 0; i<node.child.size(); i++) {
-        this->child.push_back(node.child[i]);
-    }
 }
 
 void vocabularytree::construction(clusternode &node)//recursive construction for vocabulary.
@@ -157,7 +207,7 @@ void vocabularytree::construction(clusternode &node)//recursive construction for
             construction(*(node.child[i]));
         }
     }
-   
+    
 }
 
 int vocabularytree::getlevelofcurrenttree()
@@ -177,26 +227,60 @@ void vocabularytree::printinfo()
     clusternode *p = new clusternode;
     p=root;
     p->print();
-   
+    
 }
 
-void clusternode::print()
+double vocabularytree::dist(const featurepoint &p1, const featurepoint &p2)//temporary.
 {
-    printf("nodesize:%zu\n",size());
+    return (p1.getx()-p2.getx())*(p1.getx()-p2.getx())+(p1.gety()-p2.gety())*(p1.gety()-p2.gety());
 }
 
-void vocabularytree::printnode(clusternode &node)
+void vocabularytree::setroot(const vector<featurepoint> &all)
 {
-    clusternode *p = new clusternode;
-    p=&node;
-    counterforlevel++;
-    cout<<"node:"<<counterforlevel;
-    p->print();
-    if(!(p->child.empty())){
-        for (int i = 0; i<branchingfactor; i++) {
-            
-            printnode(*(p->child[i]));
+    int i;
+    for (i=0; i<all.size(); i++) {
+        root->featureset.push_back(all[i]);
+    }
+}
+
+frameset vocabularytree::candidatekeyframesearching(frameset &candidateframe, vector<featurepoint> &pointinliveframe)
+{
+    for(int i = 0 ; i < pointinliveframe.size();i++)
+    {
+        for (int j = 0; j<totallevel; j++) {
             
         }
     }
+    return candidateframe;
+}
+
+//this algorithm was invented by a genius.
+vector <clusternode*> vocabularytree::getnodebylevel(int level) //root is in level 1.
+{
+    int visited = 0;
+    vector<clusternode*> ans;
+    queue<clusternode> nodequeue;
+    clusternode *node = new clusternode;
+    nodequeue.push(*root);
+    
+    while (visited<(quickpow(branchingfactor, level-1)-1)/(branchingfactor-1)) {
+        if (!nodequeue.empty()) {
+            visited++;
+            *node = nodequeue.front();
+            nodequeue.pop();
+            
+            if (!node->child.empty()) {
+                for (int i = 0; i < branchingfactor; i++) {
+                    nodequeue.push(*node->child[i]);
+                }
+            }
+        }
+    }
+    
+    while (!nodequeue.empty()) {
+        *node = nodequeue.front();
+        nodequeue.pop();
+        ans.push_back(node);
+    }
+    return ans;
 }

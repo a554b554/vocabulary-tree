@@ -9,16 +9,19 @@
 #ifndef __openCV__candidatekeyframeselection__
 #define __openCV__candidatekeyframeselection__
 
+#include <queue>
 #include <stdio.h>
 #include <list>
 #include <vector>
-#include "frame.h"
+#include <cmath>
+#include <iostream>
 using namespace std;
 class featurepoint
 {
     double x;
     double y;
     int flag;
+    int point_id();
 public:
     featurepoint():x(0),y(0),flag(-1){};
     featurepoint(double a,double b):x(a),y(b),flag(-1){};
@@ -39,6 +42,22 @@ public:
     }
     void print();
 };
+class frame
+{
+    int frame_id;
+    double matchingvalue;
+public:
+    frame();
+    vector<featurepoint*> point;
+    int getframeid()const{return frame_id;};
+    double getmachingvalue()const{return matchingvalue;};
+};
+class frameset
+{
+public:
+    vector<frame*> point;
+};
+/*********above is temporary class*******/
 class clusternode
 {
     static int branchingfactor;
@@ -57,6 +76,7 @@ public:
     featurepoint& at(int i);
     size_t size()const{return featureset.size();};//size of featureset.
     void print();
+    int getnumberofspannedframe();
 
 };
 class vocabularytree
@@ -67,21 +87,29 @@ private:
     int totallevel;
     double thresholdfoKmeans;
     int counterforlevel;
+    int totalnumberofkeyframe;
 public:
     vector<clusternode> node;
     clusternode *root;
     vocabularytree();
     vocabularytree(const vector <featurepoint> &allfeatures,int level,int brach);
+    
     void setroot(const vector<featurepoint> &all);
     const frame& findkeyframe();
     double dist(const featurepoint& p1,const featurepoint& p2);
     void kmean();
     void kmeanconstructor(clusternode &currentnode);
+    
     void construction(clusternode &node);
     int getbranch(){return branchingfactor;};
     int gettotallevel(){return totallevel;};
     int getlevelofcurrenttree();
+    
     void printinfo();
     void printnode(clusternode &node);
+    double getweight(clusternode &node);
+    frameset candidatekeyframesearching(frameset &candidateframe,vector<featurepoint> &pointinliveframe);
+    
+    vector<clusternode*> getnodebylevel(int level);
 };
 #endif /* defined(__openCV__candidatekeyframeselection__) */

@@ -105,6 +105,8 @@ vocabularytree::vocabularytree()//construction function need to be overload.
     this->totallevel = 3;
     thresholdfoKmeans = 10;
     counterforlevel = 0;
+    thresholdforselection = 0.1;
+    
 }
 void vocabularytree::kmeanconstructor(clusternode &currentnode)//currentnode is a node which contain a lots of featurepoint, center is a featurepoint.
 {
@@ -253,23 +255,64 @@ void vocabularytree::setroot(const vector<featurepoint> &all)
         root->featureset.push_back(all[i]);
     }
 }
-
+// algorithm 3
 frameset vocabularytree::candidatekeyframesearching(frameset &candidateframe, vector<featurepoint> &pointinliveframe)
 {
+    featurepoint currentpoint;
     for(int i = 0 ; i < pointinliveframe.size();i++)
     {
-        for (int j = 0; j<totallevel; j++) {
+        currentpoint = pointinliveframe[i];
+        for (int j = 1; j<=totallevel; j++) {
+            vector<clusternode*> nodeset;
+            nodeset = getnodebylevel(i);
             
+            double mincost=distofmostsimilarpointin(currentpoint, nodeset[0]);
+            double temp;
+            int index = 0; //index of most similar node.
+            //find node which containing the most similar feature to liveframe;
+            for (int k = 1; k<nodeset.size(); k++) {
+                temp = distofmostsimilarpointin(currentpoint, nodeset[k]);
+                if (temp<mincost) {
+                    mincost = temp;
+                    index = k;
+                }
+            }
+            if (vocabularytree::getweight(*nodeset[index])>thresholdforselection) {
+                frameset set = nodeset[index]->spannedframe();
+                double wei = getweight(*nodeset[index]);
+                for (int q = 0; q<set.point.size(); q++) {
+                    set.point[q]->addmachingvalue(nodeset[index]->getnumberofspannedframe()*wei);
+                }
+            }
         }
     }
-    return candidateframe;
+    frameset ans;
+    int *hashtable = new int[candidateframe.point.size()];
+    for(int i = 0;i<candidateframenumber;i++)//initialize
+    {
+        hashtable[i]=0;
+    }
+    for (int i = 0; i<candidateframenumber; i++) {
+        double max = candidateframe.point[0]->getmachingvalue();
+        int index = 0;
+        //find max keyframes.
+        for (int j = 1; j<candidateframe.point.size(); j++) {
+            if (candidateframe.point[j]->getmachingvalue()>max&&hashtable[j]==0) {
+                max=candidateframe.point[j]->getmachingvalue();
+                index = j;
+            }
+        }
+        hashtable[index]=1;
+        ans.point.push_back(candidateframe.point[index]);
+    }
+    return ans;
 }
 
 //this algorithm was invented by a genius.
-vector <clusternode*>* vocabularytree::getnodebylevel(int level) //root is in level 1.
+vector <clusternode*> vocabularytree::getnodebylevel(int level) //root is in level 1.
 {
     int visited = 0;
-    vector<clusternode*> *ans = new vector<clusternode*>;
+    vector<clusternode*> ans;
     queue<clusternode> nodequeue;
     clusternode *node = new clusternode;
     nodequeue.push(*root);
@@ -291,10 +334,22 @@ vector <clusternode*>* vocabularytree::getnodebylevel(int level) //root is in le
     while (!nodequeue.empty()) {
         clusternode *nd = new clusternode(nodequeue.front());
         nodequeue.pop();
-        ans->push_back(nd);
+        ans.push_back(nd);
    //     cout<<"ans:"<<ans->back()->size() <<endl;
      //   cout<<"x:"<<ans->back()->featureset[0].getx()<<endl;
     }
     //cout<<"ans:"<<ans->at(0)->size()<<endl;
     return ans;
+}
+
+double vocabularytree::distofmostsimilarpointin(const featurepoint &p, const clusternode *node)
+{
+    double mincost = dist(p, node->featureset[0]);
+    for (int i = 1; i<node->size(); i++) {
+        double temp=dist(p, node->featureset[i]);
+        if (temp<mincost) {
+            mincost = temp;
+        }
+    }
+    return  mincost;
 }

@@ -16,7 +16,7 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     vector<featurepoint> pointset;
     const int testsize = 10000;
-    vector<clusternode*> *nodeset;
+    vector<clusternode*> nodeset;
     featurepoint *temp = new  featurepoint;
    // srand(time(0));
     for (int i = 0; i<testsize; i++) {
@@ -36,7 +36,7 @@ int main(int argc, const char * argv[]) {
     tree.printinfo();
     cout<<"~~"<<endl;
     nodeset=tree.getnodebylevel(3);
-    cout<<nodeset->at(1)->size();
+    cout<<nodeset.at(8)->size();
     
     return 0;
 }

@@ -51,6 +51,7 @@ public:
     vector<featurepoint*> point;
     int getframeid()const{return frame_id;};
     double getmachingvalue()const{return matchingvalue;};
+    void addmachingvalue(double addnum){matchingvalue+=addnum;};
 };
 class frameset
 {
@@ -77,6 +78,8 @@ public:
     size_t size()const{return featureset.size();};//size of featureset.
     void print();
     int getnumberofspannedframe();
+    
+    frameset spannedframe();
 
 };
 class vocabularytree
@@ -88,6 +91,8 @@ private:
     double thresholdfoKmeans;
     int counterforlevel;
     int totalnumberofkeyframe;
+    double thresholdforselection;
+    int candidateframenumber;
 public:
     vector<clusternode> node;
     clusternode *root;
@@ -97,6 +102,8 @@ public:
     void setroot(const vector<featurepoint> &all);
     const frame& findkeyframe();
     double dist(const featurepoint& p1,const featurepoint& p2);
+    double distofmostsimilarpointin(const featurepoint& p,const clusternode *node);
+    
     void kmean();
     void kmeanconstructor(clusternode &currentnode);
     
@@ -110,6 +117,6 @@ public:
     double getweight(clusternode &node);
     frameset candidatekeyframesearching(frameset &candidateframe,vector<featurepoint> &pointinliveframe);
     
-    vector<clusternode*>* getnodebylevel(int level);
+    vector<clusternode*> getnodebylevel(int level);
 };
 #endif /* defined(__openCV__candidatekeyframeselection__) */
